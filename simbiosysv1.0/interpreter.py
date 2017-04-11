@@ -1,5 +1,13 @@
 import numpy as np
 
+#declaramos todo lo que necesitaremos despues
+metodos =[]
+eventos = []
+params = {}
+const = {}
+revparams =  {}
+acciones= []
+
 #esto procesa cada una de las ecuaciones
 #que entran en el archivo
 def procesarFuncion(linea):
@@ -40,19 +48,19 @@ def procesarTermino(termino):
 
             else:
                 ans = ans + j
+    eventos.append(ans.strip())
     return ans
 
 
-metodos =[]
-params = {}
-const = {}
-revparams =  {}
 
 #archivo que vamos a leer
 file = open("ejemplo.dat")
+
 #archivo al que escribiremos
 outf = open('ecuaciones.py', 'w')
 #solo creo que necesitaremos numpy, igual ese archivo solo se va a importar en otro
+
+print("hours =1",file=outf)
 print("import numpy as np",file= outf)
 #primero van las constantes
 #vamos a meterlas en un diccionario, facilita mucho la vida
@@ -69,7 +77,6 @@ while(not linea.startswith("------")):
         const[key] = val
         print(linea,file = outf)
 print("const = "+str(const),file = outf)
-
 #siguen los valores iniciales
 linea = file.readline()
 initVals = []
@@ -97,14 +104,15 @@ print("params = " + str(params),file = outf)
 #y los parametros reversados tambien
 print("#parametros en el diccionario reversados",file = outf)
 print("revparams = " + str(revparams),file = outf)
-
 linea = file.readline()
 #procesamos cada una de las funciones
 while(not linea.startswith("------")):
     procesarFuncion(linea)
     linea = file.readline()
+
 #ahora van las ecuaciones diferenciales
 print("#ecuaciones diferenciales",file=outf)
+
 for i in range(len(metodos)):
     #imprimos el encabezado de la funcion
     aimprimir = "def " + metodos[i][0].strip()+"(xs,const,t):"
@@ -113,6 +121,7 @@ for i in range(len(metodos)):
     #luego el cuerpo
     aimprimir = "\t"+"return "+metodos[i][1]
     print(aimprimir,file=outf)
+
 #por ultimo, metemos todas las funciones a un arreglo
 
 funcArray =[]
@@ -124,7 +133,76 @@ funcArray = str(funcArray)
 for i in funcArray:
     if(i!="\'"):
         newFuncArray += i
+#y lo imprimimos
+print("#arreglo de funciones",file = outf)
 print("funcArray = " + str(newFuncArray),file = outf)
+
+
+linea = file.readline()
+cont = 0
+#leemos las acciones asociadas a cada evento
+while(not linea.startswith("------")):
+    if(not linea.startswith("#")):
+
+        subacciones = linea.split(",")
+        for i in range(len(subacciones)):
+            aAgregar = ""
+            if(i!=len(subacciones)-1):
+                aAgregar = [float(subacciones[i]),cont]
+            else:
+                aAgregar = [float(subacciones[i][:-1]),cont]
+            acciones.append(aAgregar)
+        cont+=1
+    linea = file.readline()
+
+eventos = np.array(eventos)
+acciones = np.array(acciones)
+#tenemos que considerar los casos donde hay eventos que
+#se comparten entre ecuaciones
+#estas dos listas van a cumplir ese proposito
+curatedEvents =[]
+curatedActions = []
+#quitamos los signos de cada evento
+for i in range(len(eventos)):
+    eventos[i] = eventos[i][1:]
+
+#esto depura los eventos
+for i in range(len(eventos)):
+    aMirar = eventos[i]
+    #en el caso q se repita el evento
+    if(aMirar in curatedEvents):
+        curatedEvents = np.array(curatedEvents)
+        indices = np.where(eventos==aMirar)[0]
+        dondeVa = np.where(curatedEvents==aMirar)[0]
+        for j in indices:
+            curatedActions[int(dondeVa)][int(acciones[int(j)][1])] =acciones[int(j)][0]
+        curatedEvents= curatedEvents.tolist()
+    #en el caso que no este dentro de la lista depurada
+    else:
+
+        curatedEvents.append(aMirar)
+        subactions = np.zeros(len(params))
+        subactions[int(acciones[i][1])] = acciones[i][0]
+        curatedActions.append(subactions.tolist())
+
+#imprimimos las acciones
+print("#acciones",file = outf)
+print("actions = " + str(curatedActions),file = outf)
+
+#ademas, sacamos los eventos
+newEventos  = "["
+for i in curatedEvents:
+    ans = ""
+    for j in i:
+        if(i!="\'"):
+            ans += j
+    newEventos += (ans)+","
+newEventos = newEventos[:-1]
+newEventos += "]"
+print("#eventos",file = outf)
+print("def darEventos(xs):",file = outf)
+print("\treturn " + str(newEventos),file = outf)
+
 #Y salio para pintura
 outf.close()
 file.close()

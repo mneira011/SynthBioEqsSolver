@@ -1,20 +1,14 @@
 import numpy as np
 #constantes
-
-a = 0
-
-b=3
-
-c=5
-
-#condiciones inciales
-
-x0 = 3
-
-t0= 2
-
+const = {'c': 5.0, 'a': 0.0, 'b': 3.0}
+#valores iniciales
+initVals = [3.0, 2.0]
+#parametros en el diccionario
+params = {'x': 'xs[0]', 'y': 'xs[1]'}
+#parametros en el diccionario reversados
+revparams = {'xs[0]': 'x', 'xs[1]': 'y'}
 #ecuaciones diferenciales
-def x(x,t,xgh):
-	return 3*x*4*t  -2  +a 
-def dx(x,t,xgh):
-	return 3*xgh*4*t  -2" 
+def x(xs,const,t):
+	return 3*xs[0]*4*xs[1]  -2  +a 
+def y(xs,const,t):
+	return 3*xs[1]*4*xs[0]  -2 

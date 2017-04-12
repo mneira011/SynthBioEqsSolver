@@ -73,7 +73,7 @@ while(not linea.startswith("------")):
     linea = file.readline()
     if(not linea.startswith("#") and not linea.startswith("------")):
         key = linea.split("=")[0].strip()
-        val = float(linea.split("=")[1].strip())
+        val = (linea.split("=")[1].strip())
         const[key] = val
         print(linea,file = outf)
 print("const = "+str(const),file = outf)
@@ -127,9 +127,12 @@ for i in range(len(metodos)):
 funcArray =[]
 
 for i in params:
-    funcArray.append(i[0])
+    funcArray.append(i)
+
+
 newFuncArray = ""
 funcArray = str(funcArray)
+
 for i in funcArray:
     if(i!="\'"):
         newFuncArray += i

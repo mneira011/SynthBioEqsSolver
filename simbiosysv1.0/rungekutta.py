@@ -13,7 +13,7 @@ ValsArr.append(initVals)
 #este es el algoritmo determinista
 #para entender como funciona:
 # https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods
-def rungeKutta(FuncArr,ValsArr,const,t,h=0.2,tf=10.0):
+def rungeKutta(FuncArr,ValsArr,const,t,h=0.2,tf=300.0):
     steps = int(tf/h)+1
     for step in range(1,steps):
         h=0.2
